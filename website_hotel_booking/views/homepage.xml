@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="website_hotel_booking.reserved_rooms" name="Reserve Campsites" page="True">
+            <t t-call="website.layout">
+                <div class="oe_structure"/>
+                    <div class="container-fluid serch_conatainer">
+                        <div class="row">
+                            <div class="container">
+                                <div class="card-123"></div>
+                                <div class="card-nav mt16 mb16">
+                                    <h4 class="title">Select Park</h4>
+                                    <form class="" id="contactForm" style="text-align: center;" role="form">
+                                        <input type="hidden" name="totalrooms" id="totalrooms" value=""/>
+                                        <div class="input-container col-md-2 form-group mb16">
+                                                 <select id="drop_hotels" style="width:100%;" class="selectpicker">
+                                                        <t t-foreach="company_ids" t-as="parks">
+                                                            <option t-att-value="parks.partner_id.id"><t t-esc="parks.partner_id.name"/></option>
+                                                        </t>
+                                                </select>
+                                        </div>
+                                        <div class="input-container col-md-2 form-group mb16">
+                                            <input type="text" id="check_in" name="checkin" autocomplete="off" required="true" />
+                                            <label for="check-in">Check-in</label>
+                                            <div class="bar"></div>
+                                        </div>
+                                        <div class="input-container col-md-2 form-group mb16">
+                                            <input type="text" id="check_out" name="checkout" autocomplete="off" required="required" />
+                                            <label for="check-out">Check-out</label>
+                                            <div class="bar"></div>
+                                        </div>
+                                        <div class="dropdown_room mega-dropdown">
+                                            <div class="input-container col-md-3 dropdown-toggle form-group" data-toggle="dropdown">
+                                                <input type="text" id="room_guest" name="rooms_guest" autocomplete="off" required="required" />
+                                                <label for="room_guest">Campsites/Guests/Pets</label>
+                                                <div class="bar"></div>
+                                            </div>
+                                            <div class="dropdown-menu mega-dropdown-menu">
+                                                <div class="col-md-12">
+                                                    <table id="myTable" class="table order-list">
+                                                        <thead>
+                                                            <tr class="text-center">
+                                                                <th class="text-center" style="">No of Campsites</th>
+                                                                <th class="text-center">Adult <small style="color:gray;">(+12 yrs)</small></th>
+                                                                <th class="text-center" style="width:30%;">Children <small style="color:gray;">(1-12 yrs)</small></th>
+                                                                <th class="text-center" style="">Pets if Any</th>
+                                                                <th style="width:10%;"></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="mytbody">
+                                                            <tr>
+                                                                <td class="font_18">Campsite 1</td>
+                                                                <td>
+                                                                    <div class="col-md-12 col-sm-8">
+                                                                        <select class="adult_counter adult_select_box select_count" id="adult_selectable_1" name='anch1'>
+        						                                             <option value='0'>0 Adult</option>
+        						                                             <option value='1'>1</option>
+        						                                             <option value='2'>2</option>
+        						                                             <option value='3'>3</option>
+        						                                             <option value='4'>4</option>
+        						                                             <option value='5'>5</option>
+        						                                             <option value='6'>6</option>
+        						                                        </select>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <select class="child_counter child_select_box select_count" name='anch2' id="child_selectable_1">
+                                                                        <option value='0'>0 Children</option>
+                                                                        <option value='1'>1</option>
+                                                                        <option value='2'>2</option>
+                                                                        <option value='3'>3</option>
+                                                                        <option value='4'>4</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td>
+                                                                    <select class="pet_counter pet_select_box select_count" name='anch2' id="pet_selectable_1">
+                                                                        <option value='0'>0 Pets</option>
+                                                                        <option value='1'>1</option>
+                                                                        <option value='2'>2</option>
+                                                                        <option value='3'>3</option>
+                                                                        <option value='4'>4</option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <div>
+                                                                <td class="button-container mt16 mb16">
+                                                                    <a id="add_room" type="button" class="">
+                                                                        <i class="fa fa-plus-square fa-2x"></i>
+                                                                    </a>
+                                                                </td>
+                                                            </div>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="button-container">
+                                            <button type="button" id="check_avail_room" class="">
+                                                <span class="btn-search-text">Search</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container-fluid dynamic_park_info">
+                    </div>
+            <div class="oe_structure" />
+        </t>
+    </template>
+    
+    <template id="park_info_details" name="Park Info Details">
+        <section class="container">
+            <div class="row">
+                <div class="container">
+                  <h2><t t-esc="partner_rec.name"/></h2>
+                  <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#menu1">Park Info</a></li>
+                    <li><a data-toggle="tab" href="#menu2">Getting Here/Maps</a></li>
+                    <li><a data-toggle="tab" href="#menu3">Activities</a></li>
+                    <li><a data-toggle="tab" href="#menu4">Docs</a></li>
+                  </ul>
+
+                  <div class="tab-content">
+                    <div id="menu1" class="tab-pane fade in active">
+                        <div class="col-md-4 mt16 mb16">
+                              <p>
+                                <t t-if="partner_rec.phone"><i class="fa fa-phone" aria-hidden="true"></i>&amp;nbsp;&amp;nbsp;<t t-esc="partner_rec.phone"/><br/></t>
+                            </p>
+                              <p><t t-if="partner_rec.mobile"><i class="fa fa-mobile" aria-hidden="true"></i>&amp;nbsp;&amp;nbsp;<t t-esc="partner_rec.mobile"/><br/></t></p>
+                              <p><i class="fa fa-map-marker" aria-hidden="true"></i>&amp;nbsp;&amp;nbsp;
+                                3570 Lake Dunmore Rd <br/>
+                                Brandon, VT 05733<br/></p>
+                            <p><i class="fa fa-globe"></i>&amp;nbsp;&amp;nbsp;<span style="font-weight:bold;">Season</span>: Memorial Day Weekend - Columbus Day Weekend</p><br/>
+                        </div>
+                        <div class="col-md-4 mt16 mb16">
+                            <p>
+                                <i class="fa fa-clock-o" aria-hidden="true"></i>&amp;nbsp;Day Use Hours: 10am - official sunset<br/>
+                            </p>
+                            <p>
+                                <i class="fa fa-home" aria-hidden="true"></i>&amp;nbsp;CampingCamping: 36 tent sites, 7 lean-to sites <br/>
+                            </p>
+                            <p>
+                                <i class="fa fa-home" aria-hidden="true"></i>&amp;nbsp;Cabin/cottage/lodgeCabins/ Cottages: 1 cottage available to rent<br/>
+                            </p>
+                            <p>
+                                <i class="fa fa-paw" aria-hidden="true"></i>&amp;nbsp;PetsPets are not permitted on the sandy beach or in the designated swimming area or in the cottage. Pets are allowed elsewhere throughout the park.<br/>
+                            </p>
+                        </div>
+                    </div>
+                    <div id="menu2" class="tab-pane fade">
+                        <div class="col-md-12 mt16 mb16">
+                            <div class="col-md-4 mt16 mb16">
+                                  <p><span style="font-weight:bond;"> From Poultney </span>:
+                                    Go 7 miles south on U.S. 7, then 4 miles south on Hwy. 53.</p>
+                            </div>
+                            <div class="col-md-8 mt16 mb16">
+                                  <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d46319.91442316353!2d-73.204779!3d43.481582!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0xb2febe9c1cca962d!2sLake+St.+Catherine+State+Park!5e0!3m2!1sen!2sus!4v1520606620450" width="700" height="450" frameborder="0" style="border:0" allowfullscreen="allowfullscreen"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="menu3" class="tab-pane fade">
+                        <div class="mt16 mb16">
+                          <p class="text-justify" style="line-height: 2.6;">
+                            <i class="fa fa-paw" aria-hidden="true"></i>&amp;nbsp;<span style="font-weight:bold;">Camping</span>:This park has 36 tent/RV sites and 7 lean-to sites for campers.<br/>
+                            <i class="fa fa-paw" aria-hidden="true"></i>&amp;nbsp;<span style="font-weight:bold;">Hiking</span>:The park has a number of hiking trails ranging in difficulty.<br/>
+                            <i class="fa fa-paw" aria-hidden="true"></i>&amp;nbsp;<span style="font-weight:bold;">Swimming</span>:The park has a 1000 foot, natural and sandy beach on Lake Dunmore.<br/>
+                            <i class="fa fa-paw" aria-hidden="true"></i>&amp;nbsp;<span style="font-weight:bold;">Boating</span>:The park is great for boating. You can launch your own canoe, kayak or SUP at the beach. Canoes, kayaks, pedal boats and a rowboat are available to rent.<br/>
+                            <i class="fa fa-paw" aria-hidden="true"></i>&amp;nbsp;<span style="font-weight:bold;">Fishing</span>:There is great fishing on Lake Dunmore. Some species include rainbow trout, salmon, perch and pike. This park also participates in the Reel Fun Program. Click here to learn more.<br/>
+                            <i class="fa fa-paw" aria-hidden="true"></i>&amp;nbsp;<span style="font-weight:bold;">Picnicking</span>:There is a day-use field with picnic tables. The beach also makes a good spot for a picnic.<br/>
+                            <i class="fa fa-paw" aria-hidden="true"></i>&amp;nbsp;<span style="font-weight:bold;">Nature Programs</span>:There are nature programs and a park interpreter at this park.<br/>
+                            <i class="fa fa-paw" aria-hidden="true"></i>&amp;nbsp;<span style="font-weight:bold;">Mountain Biking</span>:There are mountain biking opportunities at the nearby Moosalamoo Recreation Area.<br/>
+                            <i class="fa fa-paw" aria-hidden="true"></i>&amp;nbsp;<span style="font-weight:bold;">Volleyball</span>:There is a volleyball net in the day use field.<br/>
+                            </p>
+                        </div>
+                    </div>
+                    <div id="menu4" class="tab-pane fade">
+                        <div class="mt16 mb16">
+                            <p class="text-justify">Eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 mt16 mb16">
+                    <h3 class="text-center mt8 mb8">Welcome</h3>
+                    <div class="col-md-3 mt16 mb16"><img class="img img-responsive center-block" src="/website_hotel_booking/static/src/img/reelfunbutton.jpg" style="" /></div>
+                    <div class="col-md-9 mt16 mb16"><p class="text-justify">Lake St. Catherine State Park has long been a destination for visitors seeking an area to relax, refresh and recreate. The 117-acre park has been in operation since it opened as a picnic and swimming area in 1953 on the shore of picturesque Lake St. Catherine. The park offers an array of recreation opportunities for campers and day-use visitors alike. These include a 61-site campground, a nature center, two sandy beaches, a large grassy field including a children’s playground and a snack-bar concession with rentals of rowboats, canoes, kayaks and pedal boats. A boat launch is available for those seeking a day of fishing or water skiing on the lake. A short hiking trail offers visitors a tour of the Big Trees of Lake St. Catherine and a breathtaking view of </p></div>
+                    <div class="col-md-9 mt16 mb16"><p class="text-justify">Lake St. Catherine provides excellent fishing opportunities for anglers of all skill levels. Panfish, largemouth and smallmouth bass, rainbow and brown trout, yellow perch and northern pike can all be found in the lake’s cool waters. Lucky visitors may catch a glimpse of a white-tailed deer or even an occasional moose. Regularly scheduled nature programs are held at the nature center.</p>
+                    <p class="text-justify"> Prior to state ownership, the area comprising Lake St. Catherine State Park consisted of a summer camp for boys and farmland. Remnants of these past activities can still be found within the park.</p></div>
+                    <div class="col-md-3 mt16 mb16"><img class="img img-responsive center-block" src="/website_hotel_booking/static/src/img/catherine-kayaking.jpg" style="" /></div>
+                </div>
+                <div class="col-md-12 mt16 mb16">
+                    <h3 class="text-center mt8 mb8">Facilities / Amenities</h3>
+                    <div class="col-md-9 mt16 mb16"><p class="text-justify">The campground contains 50 tent/RV sites and 11 lean-to sites. Grassy open areas, wooded sites and lake access make this camping area very popular. Restrooms with toilets, coin-operated hot showers and a dump station are provided. The park has well-developed picnic and swimming areas. In addition to a nature center, there is a snack bar concession with canoes, kayaks, rowboats and pedal boat rentals..</p></div> 
+<div class="col-md-3 mt16 mb16"><img class="img img-responsive center-block" src="/website_hotel_booking/static/src/img/catherine-nature-center.jpg" style="" /></div>                   
+                </div>
+                <div class="col-md-12 mt16 mb16">
+                    <h3 class="text-center mt8 mb8">Park Interpreter</h3>
+                    <!-- <div class="col-md-3 mt16 mb16"><img class="img img-responsive center-block" src="/website_hotel_booking/static/src/img/" style="" /></div> -->
+                    <div class="col-md-9 mt16 mb16"><p class="text-justify">This park has a park interpreter offering fun, hands-on activities. Interpreters are park staff solely dedicated to helping you learn more about the natural and cultural history of the park. Some popular activities include night hikes, nature crafts and games, campfire programs and amphibian explorations.</p><p class="text-justify">
+Check out the calendar of current events to see some of the programs planned during your visit.</p></div>                    
+                </div>
+            </div>
+        </section>
+    </template>
+
+
+
+    <template id="check_room_availability" name="Check Room Availability">
+        <section style="background: #f3f3f3;">
+        <div class="container">
+            <div class="row">
+                <t t-foreach="room_type" t-as="rt">
+                    <input type="hidden" name="check_IN" t-att-value="checkin"/>
+                    <input type="hidden" name="check_OUT" t-att-value="checkout"/>
+                    <input type="hidden" name="rooms_guest" t-att-value="rooms_guest"/>
+                    <input type="hidden" name="totalrooms" t-att-value="totalrooms"/>
+                    <input type="hidden" name="adult" t-att-value="adult"/>
+                    <input type="hidden" name="child" t-att-value="child"/>
+                    <t t-foreach="unreserved_rooms" t-as="unre_room">
+                        <t t-if="rt.id == unre_room.categ_id.id">
+                            <a t-att-href="'/campsites/%s' % slug(unre_room)">
+                            <div class="col-md-6" t-att-data-room_id="unre_room.id">
+                                <div class="card-room container mt32">
+                                    <div class="card-room-image">
+                                        <img class="img-responsive" t-att-src="website.image_url(unre_room, 'image_medium')" style="height:240px; width:573px;" />
+                                        <t t-if="unre_room.room_tags_ids">
+                                            <div class="card__BArea">
+                                                <div class="c-tags" id="js-tags-0">
+                                                    <t t-foreach="unre_room.room_tags_ids" t-as="room_tags">
+                                                        <div class="pull-left make_relative">
+                                                            <span class="card-room-title" t-esc="room_tags.name"></span>
+                                                        </div>
+                                                    </t>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <div>
+                                        <div class="card-room-content col-md-9">
+                                            <h4 t-esc="unre_room.name"></h4>
+                                        </div>
+                                        <div class="card-room-content col-md-3 text-right">
+                                            <h4 class="price_color" t-field="unre_room.list_price" t-field-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;res_company.currency_id&quot;}"></h4>
+                                            <small style="color:gray;">Per Campsite / Night</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="card-room-desc">
+                                            <p t-esc="unre_room.description"></p>
+                                        </div>
+                                    </div>
+                                     <div class="col-md-3">
+                                        <!-- <div class="">
+                                            <span class="fa fa-bed"></span>
+                                            <p t-esc="unre_room.capacity"></p>
+                                        </div> -->
+                                        <div class="text-right mt8">
+                                            <h5>Capacity: <span t-esc="unre_room.capacity"></span></h5>
+                                        </div>
+                                    </div>
+                                    <div class="card-room-action col-md-9">
+                                        <t t-if="unre_room.room_amenities">
+                                            <t t-foreach="unre_room.room_amenities" t-as="room_amenity">
+                                                <a t-esc="room_amenity.name"></a>
+                                            </t>
+                                        </t>
+                                    </div>
+                                    <div class="book_now_btn col-md-3" style="text-align: center;">
+                                        <div class="select_room" id="our_table" t-att-data-room_id="unre_room.id">
+                                            <td>
+                                                <span>Select Room</span>
+                                            </td>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        </t>
+                    </t>
+                </t>
+            </div>
+            <div class="accept_box">
+                    <div class="list-container">
+                        <a class="mobileSelect-control">Click here to indicate that you have read and agree to the terms presented in the <u>Terms and Conditions</u> agreement</a>
+                    </div>
+
+                    <div class="col-md-2  mb64" id="">
+                        <td>
+                            <t t-if="request.session.uid">
+                                <button type="button" class="btn btn-primary submit_btn select_continue custom_btn_disable" id="btn_select_room">Continue</button>
+                            </t>
+                            <t t-if="not request.session.uid">
+                                <button type="button" class="btn btn-primary"><a style="text-decoration: none;color: white;" href="/web/login">Continue</a></button>
+                            </t>
+                        </td>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="book_registration" name="Book Registration">
+        <section class="reg_container">
+            <div class="container">
+                <form id="form_paypal" t-att-action="tx_url" method="post" target="_self" data-toggle="validator">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="row mt64" style="background: white;">
+                        <input type="hidden" name="check_IN" t-att-value="checkin"/>
+                        <input type="hidden" name="check_OUT" t-att-value="checkout"/>
+                        <input type="hidden" name="rooms_guest" t-att-value="rooms_guest"/>
+                        <input type="hidden" name="app_adults" t-att-value="app_adults"/>
+                        <input type="hidden" name="app_child" t-att-value="app_child"/>
+                        <div class="col-md-7">
+                            <h4 style="font-weight: bold; line-height: 55px;">Booking Confirmation Details</h4>
+                            <div class="">
+                                <div class="confirm_details_form form_inputs row m0">
+                                    <div class="form-group row m0 input_row col-md-6 col-sm-12 col-xs-12 mt16">
+                                        <label class="control-label" for="app_fname">First Name</label>
+                                        <input type="text" class="form-control" id="app_fname" name="app_fname" required="required" />
+                                    </div>
+                                    <div class="form-group row m0 input_row col-md-6 col-sm-12 col-xs-12 mt16">
+                                        <label class="control-label" for="app_lname">Last Name</label>
+                                        <input type="text" class="form-control" id="app_lname" name="app_lname" required="required" />
+                                    </div>
+                                    <div class="form-group row m0 input_row col-md-6 col-sm-12 col-xs-12 mt16">
+                                        <label class="control-label" for="app_email">Email Address</label>
+                                        <input type="email" class="form-control" id="app_email" name="app_email" required="required" />
+                                    </div>
+                                    <div class="form-group row m0 input_row col-md-6 col-sm-12 col-xs-12 mt16">
+                                        <label class="control-label" for="app_phone">Mobile Number</label>
+                                        <input type="tel" class="form-control" id="app_mobile" pattern="^(0*[1-9][0-9]*)$" name="app_mobile" required="required" />
+                                    </div>
+                                    <div class="form-group row m0 input_row col-md-6 col-sm-12 col-xs-12 mt16">
+                                        <label class="control-label" for="room">Select Country</label>
+                                        <select id="country_id" name="country_id" title="Select Your Country" class="form-control selectpicker picker" data-hide-disabled="true" data-live-search="true" required="required">
+                                            <option value=""></option>
+                                            <t t-foreach="countries" t-as="ct">
+                                                <option t-att-value="ct.id">
+                                                    <t t-esc="ct.name" />
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="row m0 input_row col-md-6 col-sm-12 col-xs-12 mt16">
+                                        <label for="app_message">Message</label>
+                                        <textarea rows="" type="text" class="form-control" id="app_message" name="app_message" />
+                                    </div>
+                                </div>
+                                <div class="form-group append_bottom15 clearfix row m0 input_row col-md-12 col-sm-12 col-xs-12 custom_radio_box mt16">
+                                    <label for="pay_options">Choose Payment Methods</label>
+                                    <br />
+                                    <p class="htR-guestLogin-sctn pull-left row m0 input_row col-md-6 col-sm-12 col-xs-12">
+                                        <label class="radio block">
+                                            <input type="radio" name="pay_options" id="pay_options_paypal" required="required" />
+                                            <span class="outer">
+                                                <span class="inner"></span>
+                                            </span>
+                                            <span class="labeltext ">
+                                                <span class="label-txt lato-semibold block">Paypal</span>
+                                            </span>
+                                        </label>
+                                    </p>
+                                    <p class="htR-guestLogin-sctn pull-left row m0 input_row col-md-6 col-sm-12 col-xs-12">
+                                        <label class="radio block">
+                                            <input type="radio" name="pay_options" id="pay_options_wire" />
+                                            <span id="review_login" class="outer">
+                                                <span class="inner"></span>
+                                            </span>
+                                            <span class="labeltext">
+                                                <span class="label-txt lato-semibold block">Wire Transfer</span>
+                                            </span>
+                                        </label>
+                                    </p>
+                                </div>
+                                <input type="hidden" name="cmd" t-att-value="cmd" />
+                                <input type="hidden" name="business" t-att-value="business" />
+                                <input type="hidden" name="item_name" t-att-value="item_name" />
+                                <input type="hidden" name="amount" id="total_ammount" t-att-value="total_selected_room_price"/>
+                                <input type="hidden" name="currency_code" t-att-value="website.company_id.currency_id.name" />
+                                <input type="hidden" name="item_number" id="get_partner_data" t-att-value="reservation_no" />
+                                <input type="hidden" name="return" t-att-value="return_url" />
+                                <input type="hidden" name="notify_url" t-att-value="notify_url" />
+                                <input type="hidden" name="cancel_return" t-att-value="cancel_return" />
+                                <input type="hidden" id="invoice" name="invoice" value="" />
+                                <input type="hidden" id="partner_id" name="partner_id" t-att-value="partner_id" />
+                            </div>
+                        </div>
+                        <div class="col-md-5 summary_detail_all">
+                            <h4 style="font-weight: bold; line-height: 55px;">Booking Summary</h4>
+                            <div class="form-group row m0 input_row col-md-6 col-sm-12 col-xs-12 mt16 bottom_line">
+                                <label for="email">Check In</label>
+                                <p class="checkinout" name="arrival_date" t-esc="checkin"></p>
+                            </div>
+                            <div class="form-group row m0 input_row col-md-6 col-sm-12 col-xs-12 mt16 bottom_line">
+                                <label for="email">Check Out</label>
+                                <p class="checkinout" name="depature_date" t-esc="checkout"></p>
+                            </div>
+                            <div class="form-group row m0 input_row col-md-12 col-sm-12 col-xs-12 mt16 bottom_line">
+                                <label for="email">Campsites/Guests/Pets</label>
+                                    <p t-esc="rooms_guest"></p>
+                            </div>
+                            <div class="form-group row m0 input_row col-md-12 col-sm-12 col-xs-12 mt16 bottom_line">
+                                <label for="email">Price per Room</label>
+                                <t t-foreach="selected_rooms" t-as="one_room">
+                                    <p>
+    	                                <span><t t-esc="one_room.name"/></span>
+    	                                <span class="pull-right col-md-6"><t t-esc="one_room.list_price" t-esc-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;res_company.currency_id&quot;}" /></span>
+    	                            </p>
+                                </t>
+                            </div>
+                            <div class="form-group row m0 input_row col-md-12 col-sm-12 col-xs-12 mt16">
+                                <p>
+                                    <b>
+                                        <span>Total</span>
+                                    </b>
+                                    <span class="pull-right col-md-6 total_room_price price_style" t-esc="total_selected_room_price" t-esc-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: &quot;res_company.currency_id&quot;}" />
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="form-group row m0 input_row col-md-12 col-sm-12 col-xs-12 mt16 mb64" id="paypal_btn">
+                    <button type="submit" id="paypal_pay_now" class="pay_now_btn">
+                        <span class="btn-search-text">Pay Now</span>
+                    </button>
+                </div>
+                <div class="btn_wire form-group row m0 input_row col-md-12 col-sm-12 col-xs-12 mt16 mb64" id="wire_btn">
+                    <button type="submit" id="wire_pay_now" class="pay_now_btn">
+                        <span class="btn-search-text">Pay Now</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </template>
+    
+    <template id="book_confirm" name="Booking Confirmation">
+        <section class="reg_container">
+            <div class="container">
+                <div class="row mt64" style="background: white;">
+                    <div class="col-md-12">
+                        <h2 style="font-weight: bold; line-height: 55px;">Thank you for your order.</h2>
+                        <h3>
+                            Your Order No is :
+                            <t t-esc="reservation_no" />
+                        </h3>
+                        <p>Your transaction is waiting confirmation.</p>
+                        <h4>Please use the order number as communication reference.</h4>
+                    </div>
+                </div>
+                <div class="form-group row m0 input_row col-md-12 col-sm-12 col-xs-12 mt16 mb64">
+                    <a href="/">
+                    <button type="button" id="" class="pay_now_btn" value="back">
+                        <span class="btn-search-text">Close</span>
+                    </button>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="rent_select_property" name="Rent Property" page="True">
+        <t t-call="website.layout">
+            <div class="rest feature-properties">
+                <section class="recent-viewed-section section">
+                    <div class="container">
+                        <div class="row recent-viewed-header text-center">
+                            <div class="col-md-12">
+                                <h3>Campsite Details</h3>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <t t-if="campsite">
+                    <section>
+                        <div class="container mt16">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <ul class="nav nav-tabs" id="myTab">
+                                        <li class="active">
+                                            <a data-target="#general" data-toggle="tab">General Information</a>
+                                        </li>
+                                        <li>
+                                            <a data-target="#utility" data-toggle="tab">Utility &amp; Safety</a>
+                                        </li>
+                                        <li>
+                                            <a data-target="#amenities" data-toggle="tab">Amenities</a>
+                                        </li>
+                                        <li>
+                                            <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD2va8jyh7yRcBzKBJ1-y6wliwb6MeyXA8&amp;libraries=places"/>
+                                            <a data-target="#map" data-toggle="tab" onClick="showMap();">Map</a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div class="tab-pane active" id="general">
+                                            <div t-att-data-campsite_id="campsite.id" class="property_name_selected_property col-md-12 mt32">
+                                                <t t-esc="campsite.name" />
+                                            </div>
+                                            <div id="pro_street" t-att-data-street="campsite.partner_id.street" class="col-md-12">
+                                                <t t-esc="campsite.partner_id.street" />
+                                            </div>
+                                            <div id="pro_street2" t-att-data-street2="campsite.partner_id.street2" class="col-md-12">
+                                                <t t-esc="campsite.partner_id.street2" />
+                                            </div>
+                                            <div id="pro_city" t-att-data-city="campsite.partner_id.city" class="col-md-12">
+                                                <t t-esc="campsite.partner_id.city" />
+                                            </div>
+                                            <div id="pro_state" t-att-data-state="campsite.partner_id.name" class="col-md-12">
+                                                <t t-esc="campsite.partner_id.name" />
+                                            </div>
+                                            <div id="pro_country" t-att-data-country="campsite.partner_id.country_id.name" class="col-md-12">
+                                                <t t-esc="campsite.partner_id.country_id.name" />
+                                            </div>
+                                            <div id="pro_zip" t-att-data-zip="campsite.partner_id.zip" class="col-md-12">
+                                                <t t-esc="campsite.partner_id.zip" />
+                                            </div>
+                                            <br/>
+                                            <div class="col-md-4">
+                                                <t t-if="request.session.uid">
+                                                    <button type="button" class="btn btn-primary" id="vsp_selected_room">Request to Book</button>
+                                                </t>
+                                                <t t-if="not request.session.uid">
+                                                    <button type="button" class="btn btn-primary"><a style="text-decoration: none;color: white;" href="/web/login">Request to Book</a></button>
+                                                </t>
+                                            </div>
+                                            <br />
+                                            <div class="col-xs-12" style="color: #777777;">
+                                                <!-- <t t-esc="campsite.note" /> -->
+                                            </div>
+                                            <hr/>
+                                            <div class="col-xs-12 info-property more">
+                                                <h5 class="tittle-head"> Basic Property Details</h5>
+                                                <div class="inner">
+                                                    <div class="col-md-4 col-sm-6">
+                                                        <i class="fa fa-home" aria-hidden="true"></i>
+                                                        <t t-esc="campsite.name" />
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6">
+                                                        <i class="fa fa-tags"></i> Type:
+                                                        <!-- <t t-esc="campsite.type_id.name" /> -->
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6">
+                                                        <i class="fa fa-building"></i> No of Towers:
+                                                        <!-- <t t-esc="campsite.no_of_towers" /> -->
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6">
+                                                        <i class="fa fa-retweet"></i> Built-Up Area:
+                                                        <!-- <t t-esc="'{0:,.2f}'.format(float(campsite.gfa_feet))" /><![CDATA[&nbsp;]]>Sqft -->
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6">
+                                                        <i class="fa fa-bars"></i> Floor:
+                                                        <!-- <t t-esc="campsite.floor" /> -->
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6">
+                                                        <i class="fa fa-eraser"></i> Bathroom:
+                                                        <!-- <t t-esc="campsite.bathroom" /> -->
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6">
+                                                        <i class="fa fa-book"></i> Bedrooms:
+                                                        <!-- <t t-esc="campsite.bedroom" /> -->
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6">
+                                                       <!--  <i class="fa fa-delicious"></i> Furnishing:
+                                                        <t t-if="campsite.furnished == &quot;semi_furnished&quot;">Semi Furnished</t>
+                                                        <t t-if="campsite.furnished == &quot;full_furnished&quot;">Full Furnished</t>
+                                                        <t t-if="account_asset_property_obj.furnished == &quot;none&quot;">None</t> -->
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6">
+                                                        <i class="fa fa-ge"></i> Facing:
+                                                        <!-- <t t-esc="campsite.facing" /> -->
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6">
+                                                        <i class="fa fa-calendar-o"></i> Age of Property:
+                                                        <!-- <t t-esc="campsite.age_of_property" /> -->
+                                                    </div>
+                                                    <div class="col-md-4 col-sm-6">
+                                                        <i class="fa fa-plus-circle"></i> Added:
+                                                        <!-- <t t-esc="campsite.create_date" /> -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane" id="utility">
+                                            <!--<t t-foreach="campsite.utility_ids" t-as="one_property_utility_id">
+                                                <i class="fa fa-home" aria-hidden="true"></i><t t-esc="one_property_utility_id.utility_id.name"/><br/>
+                                            </t>-->
+                                            <div class="list-group mt32">
+                                                <a class="list-group-item col-xs-4">
+                                                    <i class="fa fa-television" aria-hidden="true"><![CDATA[&nbsp;]]> TV</i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane" id="amenities">
+                                            <div class="list-group mt32">
+                                              <a class="list-group-item col-xs-4 col-sm-4 col-md-4 col-lg-4"><i class="fa fa-cutlery" aria-hidden="true"><![CDATA[&nbsp;]]> Cafe</i></a>
+                                              <a class="list-group-item col-xs-4 col-sm-4 col-md-4 col-lg-4"><i class="fa fa-birthday-cake" aria-hidden="true"><![CDATA[&nbsp;]]> Birthday</i></a>
+                                              <a class="list-group-item col-xs-4 col-sm-4 col-md-4 col-lg-4"><i class="fa fa-wheelchair" aria-hidden="true"><![CDATA[&nbsp;]]> Wheelchair</i></a>
+                                              <a class="list-group-item col-xs-4 col-sm-4 col-md-4 col-lg-4"><i class="fa fa-taxi" aria-hidden="true"><![CDATA[&nbsp;]]> Cab</i></a>
+                                              <a class="list-group-item col-xs-4 col-sm-4 col-md-4 col-lg-4"><i class="fa fa-bus" aria-hidden="true"><![CDATA[&nbsp;]]> Bus stand</i></a>
+                                               <!--  <div class="col-md-12">
+                                                    <t t-foreach="campsite.utility_ids" t-as="u">
+                                                        <div class="col-md-4">
+                                                            <i class="fa fa-angle-double-right"></i>
+                                                            <t t-esc="u.utility_id.name" />
+                                                            <br />
+                                                        </div>
+                                                    </t>
+                                                </div> -->
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane" id="map">
+                                            <div class="mt32">
+                                                <div class="col-md-12">
+                                                    <div id="MAP" style="width: 100%;height:500px;">
+                                                        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d46319.91442316353!2d-73.204779!3d43.481582!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0xb2febe9c1cca962d!2sLake+St.+Catherine+State+Park!5e0!3m2!1sen!2sus!4v1520606620450" width="100%" height="450" frameborder="0" style="border:0" allowfullscreen="allowfullscreen"></iframe>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                             <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoaH60G3ijIxlPMEHdmPVqTfUgMCprpLo"></script> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <hr />
+                </t>
+            </div>
+        </t>
+    </template>
+</odoo>

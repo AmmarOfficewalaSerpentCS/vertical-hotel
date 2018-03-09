@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="menu_reserve" model="website.menu">
+            <field name="name">Reserve</field>
+            <field name="url">/page/reserve</field>
+            <field name="parent_id" ref="website.main_menu"/>
+<!--             <field name="sequence" type="int">11</field> -->
+        </record>
+
+    <record model="ir.ui.view" id="hotel_room_form_inherit_form">
+        <field name="name">hotel.room.form.inherit</field>
+        <field name="model">hotel.room</field>
+        <field name="inherit_id" ref="hotel.view_hotel_room_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='image_medium']" position="replace">
+                <field name="image_medium" widget="image" height="150px"/>
+            </xpath>
+            <xpath expr="//notebook/page[4]/separator[1]" position='before'>
+                <separator string="Room Tags"/>
+                <field name="room_tags_ids" widget="many2many_tags" string="Room Tags" nolabel="1" color="color"/>
+            </xpath>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="view_hotel_room_tags_tree">
+        <field name="name">view.hotel.room.tags.tree</field>
+        <field name="model">hotel.room.tags</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom" string="Room Tags">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record model="ir.actions.act_window" id="hotel_room_tags_action">
+        <field name="name">hotel.room.tags.action</field>
+        <field name="res_model">hotel.room.tags</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree</field>
+    </record>
+            
+    <menuitem name="Tags" id="menu_room_tags"
+            action="hotel_room_tags_action" sequence="21"
+            parent="hotel.hotel_configuration_menu" />
+</odoo>

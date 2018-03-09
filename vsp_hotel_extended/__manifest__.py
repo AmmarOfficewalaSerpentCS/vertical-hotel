@@ -10,8 +10,8 @@
     'category': 'Board/Hotel Room FrontDesk',
     'license': 'AGPL-3',
     'website': 'http://www.serpentcs.com',
-    'depends': ['board',
-                'report_hotel_reservation',
+    'depends': ['board','hotel',
+                'report_hotel_reservation'
                 ],
     'data': ['views/vsp_hotel_extended.xml',
             'views/board_frontdesk_view.xml'],

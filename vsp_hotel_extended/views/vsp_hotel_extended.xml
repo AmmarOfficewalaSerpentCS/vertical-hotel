@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xml>
 <odoo>
-	
+
 	<!-- Added VSP fields for "Room/Campsite"  -->
     <record id="inherited_view_hotel_room_form" model="ir.ui.view">
         <field name="name">hotel.room.form.inherited</field>
@@ -12,11 +12,12 @@
             	<attribute name='invisible'>1</attribute>
             </xpath>
             <xpath expr="//field[@name='capacity']" position="after">
+            	<field name="partner_id" domain="[('is_park','=','1')]"/>
             	<field name="site_type_id"/>
                 <field name="size"/>
 			    <field name="proximity_to_water"/>
 			    <field name="proximity_to_bathrooms"/>
-			    <field name="id_pets_allowed"/>
+			    <field name="is_pets_allowed"/>
 			    <field name="no_pets_allowed"/>
 			    <field name="max_people_allowed"/>
 			    <field name="access_type"/>
@@ -31,4 +32,111 @@
         </field>
     </record>
 
+     <!-- Added VSP fields for "Room/Amenities"  -->
+     <record id="inherited_view_hotel_room_amenities_form" model="ir.ui.view">
+        <field name="name">hotel.room.form.amenities.inherited</field>
+        <field name="model">hotel.room.amenities</field>
+        <field name="inherit_id" ref="hotel.view_hotel_room_amenities_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/notebook" position="inside">
+                <page string="Image">
+                    <group>
+                        <field name="icon"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Added VSP fields for "Partner/Parks/Companies"  -->
+    <record id="inherited_view_res_partner_form" model="ir.ui.view">
+        <field name="name">res.partner.form.inherited.vsp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/group/group[1]" position="inside">
+                <field name="is_park"
+                       attrs="{'invisible': [('company_type','=','person')]}" string="Is Park" />
+            </xpath>
+            <xpath expr="//form/sheet/notebook" position="inside">
+                <page string="Image" >
+                    <field name="images_ids">
+                         <form  editable="bottom">
+                            <field name="name" />
+                            <field name="type" />
+                            <field name="datas" />
+                        </form>
+                        <tree  editable="bottom">
+                            <field name="name" />
+                            <field name="type" />
+                            <field name="datas" />
+                        </tree>
+                    </field>
+                </page>
+
+            </xpath>
+            <xpath expr="//form/sheet/notebook" position="inside">
+                <page
+                      string="Park Information">
+                    <group>
+                        <field name="season" attrs="{'invisible':
+                                       [('company_type','=','person')]}"
+                                placeholder="Please enter your season details"
+                                />
+                         <field name="day_use_hours" attrs="{'invisible':
+                                       [('company_type','=','person')]}"
+                                placeholder="Please enter your Park Time"
+                                />
+                        <field name="camping" attrs="{'invisible':
+                                       [('company_type','=','person')]}"
+                                placeholder="Please enter your camping Time"
+                                />
+                         <field name="pets" attrs="{'invisible':
+                                       [('company_type','=','person')]}"
+                placeholder="please enetr your deatils pets are allowed or not"
+                                />
+                    </group>
+                </page>
+            </xpath>
+            <xpath expr="//form/sheet/notebook" position="inside">
+                <page string="Amenities">
+                    <field name="amenities_ids" >
+                         <form editable="bottom">
+                            <field name="partner_id" widget="handle" />
+                            <field name="amenities_id" required="1" />
+                            <field name="description" />
+                        </form>
+                        <tree editable="bottom">
+                            <field name="partner_id" widget="handle" />
+                            <field name="amenities_id" required="1" />
+                            <field name="description" />
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//form/sheet/notebook" position="inside">
+                <page string="Campsite">
+                    <field name="campsite_ids" readonly="1" >
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Create Action VSP inherited res partner  for
+    "Partner/Parks/Companies"  -->
+    <record id="inherited_action_res_partner"
+            model="ir.actions.act_window">
+        <field name="name">Park</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">
+        [('is_park','=','1'),('company_type','=','compnay') ]
+        </field>
+    </record>
+    <!-- Create menu VSP inherited res partner  for
+    "Partner/Parks/Companies"  -->
+
+    <menuitem id="menu_inherited_res_partner" parent="hotel.hotel_configuration_menu" action="inherited_action_res_partner" name="Park" />
 </odoo>
