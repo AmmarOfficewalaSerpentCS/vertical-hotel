@@ -1,0 +1,170 @@
+<odoo>
+	<data>
+
+		<!-- Add new fields in product template -->
+		<record model="ir.ui.view" id="inherited_product_fields">
+			<field name="name">Inherited Product</field>
+			<field name="model">product.template</field>
+			<field name="inherit_id" ref="product.product_template_form_view"/>
+			<field name="arch" type="xml">
+				<!-- Add rental field -->
+				<xpath expr="//form/sheet/div[2]/div" position='inside'>
+					<div>
+						<field name="rental"/>
+						<label for="rental" string='Can be Rented'/>
+					</div>
+				</xpath>
+				<!-- Add parks field -->
+				<xpath expr="//form/sheet/notebook" position='inside'>
+					<page string="Parks" name="parks">
+						<group name="parks">
+							<field name="company_ids" colspan="4" nolabel="1"/>
+						</group>
+					</page>
+				</xpath>
+				<!-- Add rent_price field -->
+				<field name='list_price' position='after'>
+					<label for="rent_price" attrs="{'invisible': [('rental','=', False)]}"/>
+					<div>
+						<field name='rent_price' widget='monetary' attrs="{'invisible': [('rental','=', False)]}"/>
+					</div>
+				</field>
+
+			</field>
+		</record>
+
+		<!-- Add product id in company's form view -->
+		<record model="ir.ui.view" id="inherited_company_fields">
+			<field name="name">Inherited Company</field>
+			<field name="model">res.company</field>
+			<field name="inherit_id" ref="base.view_company_form"/>
+			<field name="arch" type="xml">
+				<field name='website' position='after'>
+					<field name='product_id'/>
+				</field>
+			</field>
+		</record>
+
+		<!-- Form view for rent a product -->
+		<record id="rent_product_form" model="ir.ui.view">
+			<field name='name'>Rent Product</field>
+			<field name='model'>rent.product</field>
+			<field name='arch' type='xml'>
+				<form string='Rent Product'>
+					<header>
+						<button name="set_confirm" string="Confirm" states="draft" class="oe_highlight" type="object"/>
+						<button name="set_draft" string="Send to Draft" states="confirm,done" class="oe_highlight" type="object"/>
+						<field name='state' widget='statusbar'/>
+					</header>
+					<sheet>
+						<group>
+							<field name='folio_id' options="{'no_open': True, 'no_create': True}" attrs="{'readonly':[('state','!=','draft')]}"/>
+						</group>
+						<group>
+							<field name='customer_id'/>
+						</group>
+						<notebook>
+							<page string="Products">
+								<field name='product_lines' mode='tree' attrs="{'readonly':[('state','!=','draft')]}" >
+									<tree editable='bottom'>
+										<field name='product_id' domain="[('rental','=','True')]"/>
+										<field name='rent_price' widget='monetary'/>
+										<field name='quantity'/>
+										<field name='start_date' readonly='True'/>
+										<field name='end_date' readonly='True' />
+										<!-- <field name='duration' readonly='True' /> -->
+										<field name="status" readonly="True" />
+										<field name='total_amount'/>
+									</tree>
+								</field>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<!-- Tree view for product rent history -->
+		<record id='rent_product_tree' model='ir.ui.view'>
+			<field name='name'>Rented Products</field>
+			<field name='model'>rent.product</field>
+			<field name='arch' type='xml'>
+				<tree string="Rented Products">
+					<field name='customer_id'/>
+					<field name='folio_id'/>
+				</tree>
+			</field>
+		</record>
+
+		<!-- Action view for rent history -->
+		<record id='rent_product_action' model='ir.actions.act_window'>
+			<field name="name">Rent Management</field>
+			<field name="res_model">rent.product</field>
+			<field name="view_type">form</field>
+			<field name='view_mode'>tree,form</field>
+		</record>
+
+		<!-- product action for rental products -->
+		<record id="rent_product_template_action_product" model="ir.actions.act_window">
+			<field name="name">Products</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">product.template</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_type">form</field>
+			<field name="context">{"search_default_consumable": 1, 'default_type': 'product','rental':'True'}</field>
+			<field name="domain">[('rental','=','True')]</field>
+			<field name="help" type="html">
+				<p class="oe_view_nocontent_create">
+					Click to define a new rental product.
+				</p>
+			</field>
+		</record>
+
+		<!-- Return a rented product -->
+		<record id="return_rent_product_form" model="ir.ui.view">
+			<field name="name">Return Rented Product</field>
+			<field name="model">return.rent.product</field>
+			<field name="arch" type="xml">
+				<form string="Return Rented Product">
+					<sheet>
+						<group>
+							<field name="folio_id" />
+							<field name="customer_id" />
+							<field name="product_id" domain="[('rental','=',True)]" options="{'no_open': True, 'no_create': True}" />
+							<field name='quantity' />
+						</group>
+							<group>
+								<group>
+									<field name="start_date" readonly="True" />
+								</group>
+								<group>
+									<field name="end_date" />
+								</group>
+							</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<!-- Return Rental Product Action -->
+		<record id="return_rent_product_action" model="ir.actions.act_window">
+			<field name="name">Return Rented Products</field>
+			<field name="res_model">return.rent.product</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+		</record>
+
+		<!-- Rent menu -->
+		<menuitem id='rent_product_menu' name='Rent Management' parent='hotel.hotel_management_menu' />
+
+		<!-- Rental Products -->
+		<menuitem id='rental_product_menu' name='Rental Products' parent="rent_product_menu" sequence='1' action="rent_product_template_action_product"/>
+
+		<!-- Rent a product to customer-->
+		<menuitem id="rent_product_to_customer_menu" name="Rent a Product" parent="rent_product_menu" action="rent_product_action" sequence="2" />
+
+		<!-- Return a Rented Product -->
+		<menuitem id="return_product_menu" name="Return the Product" parent="rent_product_menu" action="return_rent_product_action" sequence="3" />
+
+	</data>
+</odoo>

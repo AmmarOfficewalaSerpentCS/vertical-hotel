@@ -68,6 +68,7 @@ class PaypalController(odoo.addons.payment_paypal.controllers.main.PaypalControl
                 'Paypal: unrecognized paypal answer, received %s instead of VERIFIED or INVALID' % resp.text)
         return res
 
+    # Paypal logic
     @http.route('/payment/paypal/dpn', type='http', auth="none", methods=['POST'])
     def paypal_dpn(self, **post):
         #         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
@@ -91,7 +92,7 @@ class PaypalController(odoo.addons.payment_paypal.controllers.main.PaypalControl
 
 
 class Websitehotelbooking(http.Controller):
-
+    # Reservation page
     @http.route(['/page/reserve'], type='http', auth='public', csrf=False, website=True)
     def get_data(self, *args, **kwargs):
         room_type = request.env['product.category'].sudo().search([
@@ -99,16 +100,17 @@ class Websitehotelbooking(http.Controller):
         ])
         company_id = request.env['res.users'].sudo().browse(
             request.uid).company_id
-        company_ids = request.env['res.company'].sudo().search([])
+        parks = request.env['res.partner'].sudo().search(
+            [('is_park', '=', True)])
         values = {
             'company_id': company_id,
-            'company_ids': company_ids,
+            'parks': parks,
             'room_type': request.env['product.category'].sudo().search([
                 # ('isroomtype','=',True),
-                ('parent_id', '!=', False)])
-        }
+                ('parent_id', '!=', False)])}
         return http.request.render('website_hotel_booking.reserved_rooms', values)
 
+    # Park Details
     @http.route(['/park_details'], type='json', auth='public', csrf=False, website=True)
     def park_details(self, **post):
         if post.get('park_id'):
@@ -118,6 +120,7 @@ class Websitehotelbooking(http.Controller):
             return request.env['ir.ui.view'].render_template("website_hotel_booking.park_info_details", {
                 'partner_rec': partner_rec})
 
+    # To check Availability of rooms/campsites
     @http.route(['/check_availability'], type='json', auth='public', website=True)
     def check_availability(self, **post):
         values = {}
@@ -129,8 +132,12 @@ class Websitehotelbooking(http.Controller):
         room_type = request.env['product.category'].sudo().search(
             [('id', '=', post.get('room_types'))])
         if post.get('park_id'):
+            total_guests = int(post.get('adult')) + int(post.get("child"))
             hotel_room_ids = request.env['hotel.room'].sudo().search(
-                [('isroom', '=', True), ('partner_id.id', '=', int(post.get('park_id')))])
+                [('isroom', '=', True),
+                 ("capacity", '>=', total_guests),
+                 ('partner_id.id', '=', int(post.get('park_id')))])
+
             hotel_reservation_ids = request.env['hotel.reservation']
             for i in hotel_room_ids:
                 roomprice = i.list_price
@@ -163,12 +170,14 @@ class Websitehotelbooking(http.Controller):
                 values.update({'unreserved_rooms': unreserved_hotel_room})
             all_room_type = request.env['product.category'].sudo().search([])
             values.update({
+                'park_id': post.get('park_id'),
                 'hotel_room': hotel_room_ids,
                 'checkin': get_checkin,
                 'checkout': get_checkout,
                 'rooms_guest': get_total_guests,
                 'adult': post.get('adult'),
                 'child': post.get('child'),
+                'pets': post.get('pets'),
                 'room_types': post.get('room_types'),
                 'totalrooms': post.get('totalrooms'),
                 'roomprice': roomprice,
@@ -197,6 +206,7 @@ class Websitehotelbooking(http.Controller):
             })
             return request.env['ir.ui.view'].render_template("website_hotel_booking.check_room_availability", values)
 
+    # To go to the booking page
     @http.route(['/book_now'], type='json', auth='public', website=True)
     def book_now(self, **post):
         selected_room_ids = post.get('selected_rooms')
@@ -205,7 +215,15 @@ class Websitehotelbooking(http.Controller):
         get_checkin = post.get('checkin')
         get_checkout = post.get('checkout')
         get_total_guests = post.get('rooms_guest')
-
+        get_partner_rec = request.env['res.users'].sudo().browse(
+            request.uid).partner_id
+        name_array = get_partner_rec.name.split()
+        fname = name_array[0]
+        lname = "".join(name + " " for name in name_array[1:])
+        country_id = request.env['res.country'].sudo().search(
+            [('code', '=', 'NG')])
+        default_country = request.env['res.country'].sudo().search(
+            [('code', '=', 'US')]),
         selected_rooms = request.env['hotel.room'].sudo().search(
             [('id', 'in', selected_room_ids)])
         for one_room in selected_rooms:
@@ -215,9 +233,14 @@ class Websitehotelbooking(http.Controller):
             'selected_rooms': selected_rooms,
             'total_selected_room_price': total_selected_room_price,
             'countries': request.env['res.country'].sudo().search([]),
+            'states': request.env['res.country.state'].sudo().search([]),
             'checkin': get_checkin,
             'checkout': get_checkout,
             'rooms_guest': get_total_guests,
+            'partner_rec': get_partner_rec,
+            'default_country': default_country,
+            'fname': fname,
+            'lname': lname,
         }
         payment_acquirer_obj = request.env['payment.acquirer']
         acquirer_id = payment_acquirer_obj.search([('name', '=', 'Paypal')])
@@ -225,6 +248,8 @@ class Websitehotelbooking(http.Controller):
             'web.base.url')
         acquirer = payment_acquirer_obj.sudo().browse(acquirer_id.id)
         tx_url = acquirer.get_form_action_url()
+        products = request.env['product.template'].search(
+            [('rental', '=', True), ('rent_price', '>', 0.0)])
         values.update({
             'tx_url': tx_url,
             'business': acquirer.paypal_email_account,
@@ -235,6 +260,8 @@ class Websitehotelbooking(http.Controller):
             'cancel_return': '%s' % urlparse.urljoin(base_url, PaypalController._cancel_url),
             'app_adults': post.get('app_adults'),
             'app_child': post.get('app_child'),
+            'app_pets': post.get('app_pets'),
+            'products': products,
         })
         if post.get('app_adults') or post.get('app_child'):
             total_guest = 0
@@ -252,55 +279,64 @@ class Websitehotelbooking(http.Controller):
                 })
         return request.env['ir.ui.view'].render_template("website_hotel_booking.book_registration", values)
 
+    # To create a partner if user chooses to pay with paypal
     @http.route(['/create_partner'], type='json', auth='public', csrf=False, website=True)
     def create_partner(self, **post):
-        partner_ids = request.env['res.partner'].sudo().search(
-            [('email', '=', post['app_email'])])
-        vals = {
-            'name': post.get('app_fname'),
-            'email': post.get('app_email'),
-            'mobile': post.get('app_mobile'),
-            'country_id': post.get('country_id'),
-            'comment': post.get('app_message'),
-        }
+        partner_id = int(post.get("partner"))
+        if partner_id:
+            vals = {
+                'name': post.get('app_fname') + " " + post.get('app_lname'),
+                'email': post.get('app_email'),
+                'mobile': post.get('app_mobile'),
+                'street': post.get('app_street'),
+                'city': post.get('app_city'),
+                'zip': post.get('app_zip'),
+                'state_id': int(post.get('app_state')),
+                'country_id': int(post.get('country_id')),
+                'comment': post.get('app_message'),
+            }
+            request.env['res.partner'].sudo().browse(
+                [partner_id]).write(vals)
+        partner_ids = request.env['res.partner'].sudo().browse([partner_id])
         vals_hotel_rec = {}
         pid = request.env['product.pricelist'].sudo().search([])[0]
-        if not partner_ids:
-            res_partner = request.env['res.partner'].sudo().create(vals)
-            rooms_types = post.get('app_room_type')
-            room_types_id = request.env['product.category'].sudo().search(
-                [('id', '=', rooms_types)])
-            room_type_id = post.get('room_type_id')
-#             if room_types_id:
-            vals_hotel_rec.update({
-                #                          'reservation_line':  [[0, 0, {'categ_id': room_types_id.id, 'reserve': [[6, 0, post.get('selected_rooms')]]}]]
-                'reservation_line':  [[0, 0, {'reserve': [[6, 0, post.get('selected_rooms')]]}]]
-            })
-            addr = res_partner.address_get(['delivery', 'invoice',
-                                            'contact'])
-            vals_hotel_rec.update({'partner_invoice_id': addr['invoice'],
-                                   'partner_order_id': addr['contact'],
-                                   'partner_shipping_id': addr['delivery']
-                                   })
-            if pid:
-                vals_hotel_rec.update({'pricelist_id': pid.id})
-        else:
-            rooms_types = post.get('app_room_type')
-            room_types_id = request.env['product.category'].sudo().search(
-                [('id', '=', rooms_types)])
-            room_type_id = post.get('room_type_id')
-            if room_types_id:
-                vals_hotel_rec.update({
-                    'reservation_line':  [[0, 0, {'categ_id': room_types_id.id, 'reserve': [[6, 0, post.get('selected_rooms')]]}]]
-                })
-            addr = partner_ids.address_get(['delivery', 'invoice',
-                                            'contact'])
-            vals_hotel_rec.update({'partner_invoice_id': addr['invoice'],
-                                   'partner_order_id': addr['contact'],
-                                   'partner_shipping_id': addr['delivery']
-                                   })
-            if pid:
-                vals_hotel_rec.update({'pricelist_id': pid.id})
+#         if not partner_ids:
+#             res_partner = request.env['res.partner'].sudo().create(vals)
+#             rooms_types = post.get('app_room_type')
+#             room_types_id = request.env['product.category'].sudo().search(
+#                 [('id', '=', rooms_types)])
+#             room_type_id = post.get('room_type_id')
+# #             if room_types_id:
+#             vals_hotel_rec.update({
+#                 #                          'reservation_line':  [[0, 0, {'categ_id': room_types_id.id, 'reserve': [[6, 0, post.get('selected_rooms')]]}]]
+#                 'reservation_line':  [[0, 0, {'reserve': [[6, 0, post.get('selected_rooms')]]}]]
+#             })
+#             addr = res_partner.address_get(['delivery', 'invoice',
+#                                             'contact'])
+#             vals_hotel_rec.update({'partner_invoice_id': addr['invoice'],
+#                                    'partner_order_id': addr['contact'],
+#                                    'partner_shipping_id': addr['delivery']
+#                                    })
+#             if pid:
+#                 vals_hotel_rec.update({'pricelist_id': pid.id})
+#         else:
+        rooms_types = post.get('app_room_type')
+        room_types_id = request.env['product.category'].sudo().search(
+            [('id', '=', rooms_types)])
+        room_type_id = post.get('room_type_id')
+        # if room_types_id:
+        vals_hotel_rec.update({
+            # 'reservation_line':  [[0, 0, {'categ_id': room_types_id.id, 'reserve': [[6, 0, post.get('selected_rooms')]]}]]
+            'reservation_line':  [[0, 0, {'reserve': [[6, 0, post.get('selected_rooms')]]}]]
+        })
+        addr = partner_ids.address_get(['delivery', 'invoice',
+                                        'contact'])
+        vals_hotel_rec.update({'partner_invoice_id': addr['invoice'],
+                               'partner_order_id': addr['contact'],
+                               'partner_shipping_id': addr['delivery']
+                               })
+        if pid:
+            vals_hotel_rec.update({'pricelist_id': pid.id})
         get_checkin_date = datetime.strptime(
             post.get('arrival_date'), "%m/%d/%Y %H:%M:%S")
         get_checkout_date = datetime.strptime(
@@ -311,9 +347,37 @@ class Websitehotelbooking(http.Controller):
             'checkout': get_checkout_date.strftime('%Y-%m-%d %H:%M:%S'),
             'adults': post.get('app_adults'),
             'children': post.get('app_child'),
+            'pet': post.get('app_pets'),
+            'is_wheel_chair': post.get('is_wheel_chair'),
+            'wheel_chair': post.get('wheel_chair'),
         })
         hotel_reservation_id = request.env['hotel.reservation'].sudo().create(
             vals_hotel_rec)
+
+        if post.get('product') and post.get('product')[0] != '':
+            folio_obj = request.env['hotel.folio']
+            folio_vals = {
+                'partner_id': partner_ids.id or res_partner.id,
+                'reservation_id': hotel_reservation_id.id,
+            }
+            folio_id = folio_obj.sudo().create(folio_vals)
+            i = 0
+            quantity = post.get('quantity')
+            rent_line_ids = []
+            rent_line_vals_list = []
+            for product in post.get('product'):
+                rent_line_vals = {
+                    'product_id': int(product),
+                    'quantity': int(quantity[i]),
+                }
+                rent_line_vals_list.append((0, 0, rent_line_vals))
+                i += 1
+            rent_vals = {
+                'folio_id': folio_id.id,
+                'product_lines': rent_line_vals_list,
+            }
+            rent_id = request.env['rent.product'].create(rent_vals)
+
         vals_reservation = {
             'partner_id': partner_ids.id or res_partner.id,
             'reservation_no': hotel_reservation_id.reservation_no
@@ -323,53 +387,61 @@ class Websitehotelbooking(http.Controller):
             'reservation_no': hotel_reservation_id.reservation_no
         }
 
+    # Book the campsite if user chooses Wire Transfer
     @http.route(['/create_partner_1'], type='json', auth='public', website=True)
     def create_partner_1(self, **post):
-        partner_ids = request.env['res.partner'].sudo().search(
-            [('email', '=', post['app_email'])])
-        vals = {
-            'name': post.get('app_fname'),
-            'email': post.get('app_email'),
-            'mobile': post.get('app_mobile'),
-            'country_id': post.get('country_id'),
-            'comment': post.get('app_message'),
-        }
+        partner_id = int(post.get("partner"))
+        if partner_id:
+            vals = {
+                'name': post.get('app_fname') + " " + post.get('app_lname'),
+                'email': post.get('app_email'),
+                'mobile': post.get('app_mobile'),
+                'street': post.get('app_street'),
+                'city': post.get('app_city'),
+                'zip': post.get('app_zip'),
+                'state_id': int(post.get('app_state')),
+                'country_id': int(post.get('country_id')),
+                'comment': post.get('app_message'),
+            }
+            request.env['res.partner'].sudo().browse(
+                [partner_id]).write(vals)
+        partner_ids = request.env['res.partner'].sudo().browse([partner_id])
         vals_hotel_rec = {}
         pid = request.env['product.pricelist'].sudo().search([])[0]
-        if not partner_ids:
-            res_partner = request.env['res.partner'].sudo().create(vals)
-            rooms_types = post.get('app_room_type')
-            room_types_id = request.env['product.category'].sudo().search(
-                [('id', '=', rooms_types)])
-            room_type_id = post.get('room_type_id')
-            vals_hotel_rec.update({
-                'reservation_line':  [[0, 0, {'categ_id': room_types_id.id, 'reserve': [[6, 0, post.get('selected_rooms')]]}]]
-            })
-            addr = res_partner.address_get(['delivery', 'invoice',
-                                            'contact'])
-            vals_hotel_rec.update({'partner_invoice_id': addr['invoice'],
-                                   'partner_order_id': addr['contact'],
-                                   'partner_shipping_id': addr['delivery']
-                                   })
-            if pid:
-                vals_hotel_rec.update({'pricelist_id': pid.id})
-        else:
-            rooms_types = post.get('app_room_type')
-            room_types_id = request.env['product.category'].sudo().search(
-                [('id', '=', rooms_types)])
-            room_type_id = post.get('room_type_id')
-#             if room_types_id:
-            vals_hotel_rec.update({
-                'reservation_line':  [[0, 0, {'categ_id': room_types_id.id, 'reserve': [[6, 0, post.get('selected_rooms')]]}]]
-            })
-            addr = partner_ids.address_get(['delivery', 'invoice',
-                                            'contact'])
-            vals_hotel_rec.update({'partner_invoice_id': addr['invoice'],
-                                   'partner_order_id': addr['contact'],
-                                   'partner_shipping_id': addr['delivery']
-                                   })
-            if pid:
-                vals_hotel_rec.update({'pricelist_id': pid.id})
+        # if not partner_ids:
+        #     res_partner = request.env['res.partner'].sudo().create(vals)
+        #     rooms_types = post.get('app_room_type')
+        #     room_types_id = request.env['product.category'].sudo().search(
+        #         [('id', '=', rooms_types)])
+        #     room_type_id = post.get('room_type_id')
+        #     vals_hotel_rec.update({
+        #         'reservation_line':  [[0, 0, {'categ_id': room_types_id.id, 'reserve': [[6, 0, post.get('selected_rooms')]]}]]
+        #     })
+        #     addr = res_partner.address_get(['delivery', 'invoice',
+        #                                     'contact'])
+        #     vals_hotel_rec.update({'partner_invoice_id': addr['invoice'],
+        #                            'partner_order_id': addr['contact'],
+        #                            'partner_shipping_id': addr['delivery']
+        #                            })
+        #     if pid:
+        #         vals_hotel_rec.update({'pricelist_id': pid.id})
+        # else:
+        rooms_types = post.get('app_room_type')
+        room_types_id = request.env['product.category'].sudo().search(
+            [('id', '=', rooms_types)])
+        room_type_id = post.get('room_type_id')
+        vals_hotel_rec.update({
+            # 'reservation_line':  [[0, 0, {'categ_id': room_types_id.id, 'reserve': [[6, 0, post.get('selected_rooms')]]}]]
+            'reservation_line':  [[0, 0, {'reserve': [[6, 0, post.get('selected_rooms')]]}]]
+        })
+        addr = partner_ids.address_get(['delivery', 'invoice',
+                                        'contact'])
+        vals_hotel_rec.update({'partner_invoice_id': addr['invoice'],
+                               'partner_order_id': addr['contact'],
+                               'partner_shipping_id': addr['delivery']
+                               })
+        if pid:
+            vals_hotel_rec.update({'pricelist_id': pid.id})
         get_checkin_date = datetime.strptime(
             post.get('arrival_date'), "%m/%d/%Y %H:%M:%S")
         get_checkout_date = datetime.strptime(
@@ -380,19 +452,162 @@ class Websitehotelbooking(http.Controller):
             'checkout': get_checkout_date.strftime('%Y-%m-%d %H:%M:%S'),
             'adults': post.get('app_adults'),
             'children': post.get('app_child'),
+            'pet': post.get('app_pets'),
+            'is_wheel_chair': post.get('is_wheel_chair'),
+            'wheel_chair': post.get('wheel_chair'),
         })
 
         hotel_reservation_id = request.env['hotel.reservation'].sudo().create(
             vals_hotel_rec)
+
+        if post.get('product') and post.get('product')[0] != '':
+            folio_obj = request.env['hotel.folio']
+            folio_vals = {
+                'partner_id': partner_ids.id or res_partner.id,
+                'reservation_id': hotel_reservation_id.id,
+            }
+            folio_id = folio_obj.sudo().create(folio_vals)
+            i = 0
+            quantity = post.get('quantity')
+            rent_line_ids = []
+            rent_line_vals_list = []
+            for product in post.get('product'):
+                rent_line_vals = {
+                    'product_id': int(product),
+                    'quantity': int(quantity[i]),
+                }
+                rent_line_vals_list.append((0, 0, rent_line_vals))
+                i += 1
+            rent_vals = {
+                'folio_id': folio_id.id,
+                'product_lines': rent_line_vals_list,
+            }
+            rent_id = request.env['rent.product'].create(rent_vals)
+
         return request.env['ir.ui.view'].render_template("website_hotel_booking.book_confirm", {
             'partner_id': partner_ids.id or res_partner.id,
             'reservation_no': hotel_reservation_id.reservation_no
         })
 
-    @http.route(['/campsites/<model("hotel.room"):campsite>'],
-                type='http', auth="public", website=True)
-    def campsite(self, campsite, **kw):
+    # To Display Campsite Details
+    @http.route(['/campsite_details'],
+                type='json', auth="public", website=True)
+    def campsite(self, **post):
+        campsite = request.env['hotel.room'].sudo().search(
+            [('id', '=', post.get('campsite_id'))])
         values = {
             'campsite': campsite,
+            'totalrooms': post.get('totalrooms'),
+            'park_id': post.get('park_id')
         }
-        return request.render("website_hotel_booking.rent_select_property", values)
+        total_selected_room_price = 0.0
+        total_adults = 0
+        get_checkin = post.get('checkin')
+        get_checkout = post.get('checkout')
+        get_total_guests = post.get('rooms_guest')
+        get_partner_rec = request.env['res.users'].sudo().browse(
+            request.uid).partner_id
+        country_id = request.env['res.country'].sudo().search(
+            [('code', '=', 'NG')])
+        default_country = request.env['res.country'].sudo().search(
+            [('code', '=', 'US')]),
+        values.update({
+            'total_selected_room_price': total_selected_room_price,
+            'countries': request.env['res.country'].sudo().search([]),
+            'states': request.env['res.country.state'].sudo().search([('country_id', '=', country_id.id)]),
+            'checkin': get_checkin,
+            'checkout': get_checkout,
+            'rooms_guest': get_total_guests,
+            'partner_rec': get_partner_rec,
+            'default_country': default_country
+        })
+        payment_acquirer_obj = request.env['payment.acquirer']
+        acquirer_id = payment_acquirer_obj.search([('name', '=', 'Paypal')])
+        base_url = payment_acquirer_obj.env['ir.config_parameter'].get_param(
+            'web.base.url')
+        acquirer = payment_acquirer_obj.sudo().browse(acquirer_id.id)
+        tx_url = acquirer.get_form_action_url()
+        values.update({
+            'tx_url': tx_url,
+            'business': acquirer.paypal_email_account,
+            'cmd': '_xclick',
+            'item_name': acquirer.company_id.name,
+            'return_url': '%s' % urlparse.urljoin(base_url, PaypalController._return_url),
+            'notify_url': '%s' % urlparse.urljoin(base_url, PaypalController._notify_url),
+            'cancel_return': '%s' % urlparse.urljoin(base_url, PaypalController._cancel_url),
+            'app_adults': post.get('app_adults'),
+            'app_child': post.get('app_child'),
+            'app_pets': post.get('app_pets'),
+        })
+        if post.get('app_adults') or post.get('app_child'):
+            total_guest = 0
+            if post.get('app_adults') and post.get('app_child'):
+                total_guest = int(post.get('app_adults')) + \
+                    int(post.get('app_child'))
+            if post.get('app_adults') and not post.get('app_child'):
+                total_guest = int(post.get('app_adults'))
+            if post.get('app_child') and not post.get('app_adults'):
+                total_guest = int(post.get('app_child'))
+            if total_guest > total_adults:
+                values.update({
+                    'select_more_rooms': 'Please Select more Rooms',
+                    'countries': request.env['res.country'].sudo().search([]),
+                })
+        return request.env['ir.ui.view'].render_template("website_hotel_booking.rent_select_property", values)
+
+    # To display reservation details of user as well as profile details
+    @http.route(['/page/my_reservations'],
+                type='http', auth="public", website=True)
+    def my_reservations(self, **kw):
+        partner_id = request.env['res.users'].sudo().browse(
+            request.uid).partner_id.id
+        reservations = request.env['hotel.reservation'].sudo().search(
+            [('partner_id', '=', partner_id)])
+        values = {
+            'reservations': reservations,
+        }
+        user_details = request.env['res.partner'].sudo().browse(
+            [(request.env.user.partner_id.id)])
+        for i in user_details:
+            values.update({'id': i.id,
+                           'name': i.name, 'email': i.email,
+                           'company_name': i.company_name,
+                           'website_address': i.website,
+                           'phone': i.phone,
+                           'mobile': i.mobile,
+                           'street': i.street,
+                           'state_id': i.state_id,
+                           'state_name': i.state_id.name,
+                           'country_id': i.country_id,
+                           'country_name': i.country_id.name,
+                           'city': i.city,
+                           'zip_code': i.zip
+                           })
+
+#            all state data to fill in state dropdown
+        state_details = request.env['res.country.state'].\
+            sudo().search([])
+        state_detail_list = []
+        for state in state_details:
+            state_detail = {}
+            state_detail.update({'id': state.id, 'name': state.name,
+                                 'country_id': state.country_id.id})
+            state_detail_list.append(state_detail)
+        values.update({'state_detail': state_detail_list})
+
+#            all details of country to display in country dropdown
+        country_details = request.env['res.country'].\
+            sudo().search([])
+        country_detail_list = []
+        for country in country_details:
+            country_detail = {}
+            country_detail.update({'id': country.id, 'name': country.name})
+            country_detail_list.append(country_detail)
+        values.update({'country_detail': country_detail_list})
+        return request.render("website_hotel_booking.my_reservations", values)
+
+# To cancel a reservation
+    @http.route(['/cancel_reservation'],
+                type='json', auth="public", website=True)
+    def cancel_reservation(self, **kw):
+        return request.env['hotel.reservation'].sudo().search([('reservation_no', '=', kw.get('reservation_no'))]).write({'state': 'cancel'})

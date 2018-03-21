@@ -593,8 +593,8 @@
                         statusbar_visible="draft,sent,sale,done" />
                 </header>
                 <sheet>
-                    <div class="oe_right oe_button_box">
-                        <button name="go_to_currency_exchange" string="Money Exchange"
+		    <div class="oe_button_box" name="button_box">
+                       <button name="go_to_currency_exchange" string="Money Exchange"
                             icon="fa-refresh" class="oe_stat_button" type="object" />
                     </div>
                     <label string="Folio Number" />

@@ -15,10 +15,10 @@ class HotelRoomExtended(models.Model):
     site_type_id = fields.Many2one('hotel.room.site',string="Site type")
     size = fields.Integer(string="Size Of the Campsite")
     proximity_to_water = fields.Integer(string="Proximity To Water")
-    proximity_to_bathrooms = fields.Integer(string="Number Of Vehicles Allowed")
+    proximity_to_bathrooms = fields.Integer(string="Proximity Bathroom")
     is_pets_allowed = fields.Boolean(string="Are pets allowed ?")
-    no_pets_allowed = fields.Integer(string="Number Of Vehicles Allowed") 
-    max_people_allowed = fields.Integer(string="Number Of Vehicles Allowed")
+    no_pets_allowed = fields.Integer(string="Number of Pets allowed" )
+    max_people_allowed = fields.Integer(string="Maximum Pepole Allowed")
     access_type = fields.Selection([('vehicle','Vehicle'),
         ('walk_in','Walk In')], string="How to Access this site ?")
     surface = fields.Char(string="Surface")
@@ -115,6 +115,8 @@ class ResPartnerInherited(models.Model):
     camping = fields.Char(string="Camping")
     pets = fields.Char(string="Pets")
     images_ids = fields.One2many('ir.attachment','partner_id',string="images")
+    doument_ids = fields.One2many('ir.attachment', 'partner_id',
+                                 string="Documention")
 
     @api.model
     def default_get(self,fields):
@@ -127,7 +129,6 @@ class ResPartnerInherited(models.Model):
             @return: default value of dictionary.
         """
         res = super(ResPartnerInherited, self).default_get(fields)
-        print ".......................................",res
         res['is_company'] = 'True'
 
         return res

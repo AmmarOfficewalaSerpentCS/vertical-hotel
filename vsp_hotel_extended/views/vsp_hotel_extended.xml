@@ -12,17 +12,20 @@
             	<attribute name='invisible'>1</attribute>
             </xpath>
             <xpath expr="//field[@name='capacity']" position="after">
-            	<field name="partner_id" domain="[('is_park','=','1')]"/>
+            	<field name="partner_id" domain="[('is_park','=','1')]"
+                       index="True"/>
             	<field name="site_type_id"/>
                 <field name="size"/>
 			    <field name="proximity_to_water"/>
 			    <field name="proximity_to_bathrooms"/>
-			    <field name="is_pets_allowed"/>
-			    <field name="no_pets_allowed"/>
-			    <field name="max_people_allowed"/>
+			    <field name="is_pets_allowed" string="Proximity Bathroom"/>
+			    <field name="no_pets_allowed" attrs="{'invisible':[
+                                            ('is_pets_allowed','=',False)]}" string="Number of Pets allowed"/>
+			    <field name="max_people_allowed" string="Maximum Pepole Allowed"/>
 			    <field name="access_type"/>
 			    <field name="is_hookups"/>
-			    <field name="hookup_types" attrs="{'invisible': [('is_hookups', '!=', True)]}"  widget="many2many_tags"/>
+			    <field name="hookup_types" attrs="{'invisible':
+			    [('is_hookups', '!=', True)]}"  widget="many2many_tags"/>
 			    <field name="no_of_vehicles"/>
 			    <field name="sort_code"/>
 			    <field name="sun"/>
@@ -59,7 +62,8 @@
                        attrs="{'invisible': [('company_type','=','person')]}" string="Is Park" />
             </xpath>
             <xpath expr="//form/sheet/notebook" position="inside">
-                <page string="Image" >
+                <page string="Image" attrs="{'invisible':[
+                                            ('is_park','=',False)]}" >
                     <field name="images_ids">
                          <form  editable="bottom">
                             <field name="name" />
@@ -76,30 +80,27 @@
 
             </xpath>
             <xpath expr="//form/sheet/notebook" position="inside">
-                <page
-                      string="Park Information">
+                <page string="Park Information" attrs="{'invisible':[
+                                            ('is_park','=',False)]}">
                     <group>
-                        <field name="season" attrs="{'invisible':
-                                       [('company_type','=','person')]}"
+                        <field name="season"
                                 placeholder="Please enter your season details"
                                 />
-                         <field name="day_use_hours" attrs="{'invisible':
-                                       [('company_type','=','person')]}"
+                         <field name="day_use_hours"
                                 placeholder="Please enter your Park Time"
                                 />
-                        <field name="camping" attrs="{'invisible':
-                                       [('company_type','=','person')]}"
-                                placeholder="Please enter your camping Time"
+                        <field name="camping"
+                               placeholder="Please enter your camping Time"
                                 />
-                         <field name="pets" attrs="{'invisible':
-                                       [('company_type','=','person')]}"
+                         <field name="pets"
                 placeholder="please enetr your deatils pets are allowed or not"
                                 />
                     </group>
                 </page>
             </xpath>
             <xpath expr="//form/sheet/notebook" position="inside">
-                <page string="Amenities">
+                <page string="Amenities" attrs="{'invisible':[
+                                            ('is_park','=',False)]}">
                     <field name="amenities_ids" >
                          <form editable="bottom">
                             <field name="partner_id" widget="handle" />
@@ -115,10 +116,111 @@
                 </page>
             </xpath>
             <xpath expr="//form/sheet/notebook" position="inside">
-                <page string="Campsite">
-                    <field name="campsite_ids" readonly="1" >
+                <page string="Campsite" attrs="{'invisible':[
+                                            ('is_park','=',False)]}">
+                    <field name="campsite_ids" readonly="1"   >
                     </field>
                 </page>
+            </xpath>
+            <xpath expr="//form/sheet/notebook" position="inside">
+                <page string="Docs" attrs="{'invisible':[
+                                            ('is_park','=',False)]}" >
+                    <field name="doument_ids">
+                         <form  editable="bottom">
+                            <field name="name" />
+                            <field name="type" />
+                            <field name="datas" />
+                        </form>
+                        <tree  editable="bottom">
+                            <field name="name" />
+                            <field name="type" />
+                            <field name="datas" />
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="inherited_view_hotel_room_search" model="ir.ui.view">
+        <field name="name">hotel.room.search.inherited.vsp</field>
+        <field name="model">hotel.room</field>
+        <field name="inherit_id" ref="hotel.view_hotel_room_search" />
+        <field name="arch" type="xml">
+            <xpath expr="//search/field[@name='status']"
+                   position="after">
+                <field name="partner_id"
+                       domain="[('name','ilike',self)]" />
+            </xpath>
+            <xpath expr="//search/field[@name='status']"
+                   position="after">
+                 <field name="site_type_id" string="Site"
+                       domain="[('name','ilike',self)]" />
+            </xpath>
+            <xpath expr="//search/field[@name='status']"
+                   position="after">
+                 <field name="capacity" string="Capacity"
+                        />
+            </xpath>
+            <xpath expr="//search/field[@name='status']"
+                   position="after">
+                 <field name="proximity_to_water"
+                        string="Proximity To Water" />
+            </xpath>
+            <xpath expr="//search/field[@name='status']"
+                   position="after">
+                <separator string="pets"/>
+                <filter name="is_pets_allowed" string="Pets Allowed"
+                        help="Allowed pets"
+                        domain="[('is_pets_allowed','=',True)]" />
+                <filter name="is_pets_allowed" string="Pets Not Allowed"
+                        help="Not Allowed pets"
+                        domain="[('is_pets_allowed','=',False)]" />
+                <!--<filter string="Reserved" domain="[('status','=', 'occupied')]" help="Reserved Rooms"/>-->
+            </xpath>
+        </field>
+    </record>
+
+    <record id="inherited_view_res_partner_search" model="ir.ui.view">
+        <field name="name">res.partner.search.inherited.vsp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter" />
+        <field name="arch" type="xml">
+            <xpath expr="//search/field[@name='name']" position="after">
+                <field name="country_id"
+                       domain="[('name','ilike',self)]" />
+
+            </xpath>
+        </field>
+    </record>
+
+    <record id="inherited_view_hotel_reservation_search" model="ir.ui.view">
+        <field name="name">hotel.reservation.search.inherited.vsp</field>
+        <field name="model">hotel.reservation</field>
+        <field name="inherit_id" ref="hotel_reservation.view_hotel_reservation_search" />
+        <field name="arch" type="xml">
+            <xpath expr="//search/field[@name='state']" position="after">
+                <field name="date_dateorder" />
+                <field name="checkin" widget="Date"
+                       string="Expected-Arival-DateTimestamp" />
+                <field name="checkout" widget="Date"
+                       string="Expected-Depature-DateTimestamp" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="inherited_view_hotel_folio_search" model="ir.ui.view">
+        <field name="name">hotel.folio.search.inherited.vsp</field>
+        <field name="model">hotel.folio</field>
+        <field name="inherit_id" ref="hotel.view_hotel_folio_search" />
+        <field name="arch" type="xml">
+            <xpath expr="//search/field[@name='name']" position="after">
+                <filter domain="[('state','=','draft')]" string="Draft" />
+                <filter domain="[('state','=','sent')]"
+                        string="Sent Sale Order" />
+                <filter domain="[('state','=','cancel')]" string="Cancel" />
+                <filter domain="[('state','=','done')]" string="Done" />
+                <filter domain="[('state','=','sale')]" string="Sales" />
             </xpath>
         </field>
     </record>

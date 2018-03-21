@@ -15,6 +15,7 @@
         'views/hotel_room_view.xml',
         'views/templates.xml',
         'views/homepage.xml',
+        'views/my_profile.xml',
     ],
     'installable': True,
     'auto_install': False,

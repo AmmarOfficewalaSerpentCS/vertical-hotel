@@ -6,9 +6,10 @@ import datetime
 import urllib2
 from odoo.exceptions import ValidationError
 from odoo.osv import expression
-from odoo.tools import misc, DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.tools import misc
 from odoo import models, fields, api, _
 from decimal import Decimal
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
 
 def _offset_format_timestamp1(src_tstamp_str, src_format, dst_format,
@@ -405,6 +406,8 @@ class HotelFolio(models.Model):
                                        copy=False)
     duration_dummy = fields.Float('Duration Dummy')
 
+    
+
     @api.multi
     def go_to_currency_exchange(self):
         '''
@@ -759,13 +762,18 @@ class HotelFolioLine(models.Model):
         @param self: object pointer
         @return: raise warning depending on the validation
         '''
-        if self.checkin_date >= self.checkout_date:
+
+        checkin = datetime.datetime.strptime(self.checkin_date, DEFAULT_SERVER_DATETIME_FORMAT).date()
+        date_ordar = datetime.datetime.strptime(self.folio_id.date_order,
+                                            DEFAULT_SERVER_DATETIME_FORMAT).date()
+
+        if self.checkin_date > self.checkout_date:
                 raise ValidationError(_('Room line Check In Date Should be \
                 less than the Check Out Date!'))
         if self.folio_id.date_order and self.checkin_date:
-            if self.checkin_date <= self.folio_id.date_order:
+            if checkin < date_ordar:
                 raise ValidationError(_('Room line check in date should be \
-                greater than the current date.'))
+                greater than the current date'))
 
     @api.multi
     def unlink(self):

@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="website_hotel_booking.my_reservations" name="My Reserved Campsites" page="True">
+        <t t-call="website.layout">
+			
+			<div class="container-fluid">
+				<div class="row">
+                    <section class="recent-viewed-section section">
+                        <div class="container">
+                            <div class="row recent-viewed-header text-center">
+                                <div class="col-md-12">
+                                    <h3>My Profile Details</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <div class="row mt32">
+                   <div class="col-md-1 col-sm-12 col-xs-12"></div>
+                   <div class="col-md-10 col-sm-12 col-xs-12 tbl_header">
+                        <div class="col-md-9 col-sm-12 col-xs-12">
+                           <h4 class="tbl_header">BASIC DETAILS</h4>
+                        </div>
+                        <div class="col-md-3 col-sm-12 col-xs-12" style="text-align: center;">
+                            <div class="btn btn_basic_detail_edit">EDIT</div>
+                            <div class="btn btn_basic_detail_save txt_hidden">SAVE</div>
+                        </div>
+                   </div>
+                   <div class="col-md-1 col-sm-12 col-xs-12"></div>
+                </div>
+                <div class="row">
+                               <div class="col-md-1 col-sm-12 col-xs-12"></div>
+                               <div class="col-md-10 col-sm-12 col-xs-12 tbl_body">
+                                    <div class="col-md-9 col-sm-12 col-xs-12">
+                                       <div class='col-md-12 col-sm-12 col-xs-12'>
+                                               <div class='col-md-6 col-sm-6 col-xs-12'>
+                                                   <div class='col-md-12 col-hdr'>
+                                                       Name
+                                                   </div>
+                                                   <div class='col-md-12'>
+                                                       <input type='text' readonly='1' name='txt_name' t-att-value="name" class="basic_txt form-control txt_name"/>
+                                                       <input type='text' readonly='1' name='txt_uid' t-att-value="user_id.partner_id.id" class="basic_txt form-control txt_uid txt_hidden"/>
+                                                   </div>
+                                               </div>
+                                               <div class='col-md-6 col-sm-6 col-xs-12'>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12 col-hdr'>
+                                                       Email-ID
+                                                   </div>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12'>
+                                                       <input type='text' readonly='1' name='txt_email' t-att-value="email" class="basic_txt form-control txt_email"/>
+                                                   </div>
+                                               </div>
+                                               <div class='col-md-6 col-sm-6 col-xs-12'>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12 col-hdr'>
+                                                       Company Name
+                                                   </div>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12'>
+                                                       <input type='text' readonly='1' name='txt_company_name' t-att-value="company_name" class="basic_txt form-control txt_company_name"/>
+                                                   </div>
+                                               </div>
+                                               <div class='col-md-6 col-sm-6 col-xs-12'>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12 col-hdr'>
+                                                       Website
+                                                   </div>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12'>
+                                                       <input type='text' readonly='1' name='txt_website_address' t-att-value="website_address" class="basic_txt form-control txt_website_address"/>
+                                                   </div>
+                                               </div>
+                                               <div class='col-md-6 col-sm-6 col-xs-12'>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12 col-hdr'>
+                                                       Phone Number
+                                                   </div>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12'>
+                                                       <input type='text' readonly='1' name='txt_phone' t-att-value="phone" class="basic_txt form-control txt_phone"/>
+                                                   </div>
+                                               </div>
+                                               <div class='col-md-6 col-sm-6 col-xs-12'>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12 col-hdr'>
+                                                       Mobile Number
+                                                   </div>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12'>
+                                                       <input type='text' readonly='1' name='txt_mobile' t-att-value="mobile" class="basic_txt form-control txt_mobile"/>
+                                                   </div>
+                                               </div>
+                                               <div class='col-md-6 col-sm-6 col-xs-12'>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12 col-hdr'>
+                                                       Street
+                                                   </div>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12'>
+                                                       <input type='text' readonly='1' name='txt_street' t-att-value="street" class="basic_txt form-control txt_street"/>
+                                                   </div>
+                                               </div>
+                                               <div class='col-md-6 col-sm-6 col-xs-12'>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12 col-hdr'>
+                                                       City
+                                                   </div>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12'>
+                                                       <input type='text' readonly='1' name='txt_city' t-att-value="city" class="basic_txt form-control txt_city"/>
+                                                   </div>
+                                               </div>
+                                               <div class='col-md-6 col-sm-6 col-xs-12'>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12 col-hdr'>
+                                                       Country
+                                                   </div>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12'>
+                                                       <input type='text' readonly='1' name='txt_c_name' t-att-value="country_name" class="basic_txt form-control txt_c_name"/>
+                                                       <input type='text' readonly='1' name='txt_c_id' t-att-value="country_id" class="basic_txt form-control txt_hidden txt_c_id"/>
+                                                       <select name="country_id_dropdown" class="form-control drop_country_dtails txt_hidden">
+                                                            <option value="">---SELECT---</option>
+                                                            <t t-foreach="country_detail" t-as="country">
+                                                                <option t-att-value="country.get('id')" t-att-selected="country.get('id') == user_id.partner_id.country_id.id">
+                                                                    <t t-esc="country.get('name')" />
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                   </div>
+                                               </div>
+                                               <div class='col-md-6 col-sm-6 col-xs-12 lbl_state'>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12 col-hdr'>
+                                                       State
+                                                   </div>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12'>
+                                                       <input type='text' readonly='1' name='txt_s_name' t-att-value="state_name" class="basic_txt form-control txt_s_name"/>
+                                                       <input type='text' readonly='1' name='txt_s_id' t-att-value="state_id" class="basic_txt form-control txt_hidden txt_s_id"/>
+                                                       <select name="state_id_dropdown" class="form-control drop_state_dtails txt_hidden">
+                                                            <option value="">---SELECT---</option>
+                                                            <t t-foreach="state_detail" t-as="state">
+                                                                <option t-att-value="state.get('id')" t-att-data-country_id="state.get('country_id')" t-att-selected="state.get('id') == user_id.partner_id.state_id.id">
+                                                                    <t t-esc="state.get('name')" />
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                   </div>
+                                               </div>
+                                               <div class='col-md-6 col-sm-6 col-xs-12'>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12 col-hdr'>
+                                                       Zip Code
+                                                   </div>
+                                                   <div class='col-md-12 col-sm-12 col-xs-12'>
+                                                          <input type='text' readonly='1' name='txt_zip_code' t-att-value="zip_code" class="basic_txt form-control txt_zip_code"/>
+                                                   </div>
+                                               </div>
+                                       </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-12 col-xs-12" style="text-align: center;padding:50px;">
+                                        <div>
+                                            <img class='preview_image profile_img' height='200' width='200'/><br/>
+                                            <div class="mb16">
+                                                <i class="fileinput chng_profile_lbl fa fa-camera txt_hidden" style="margin-left:-5px !important;margin-top:-80px !important;">
+                                                    
+                                                </i>
+                                                <input name="profile_photo" id="profile_photo_account" type="file" class="img img-responsive my_img_fp" accept="image/*" t-att-name="prefix" style='display:none;'/><br/>
+                                                <input type='hidden' id='image_src' class ='image_src' name='image' t-att-value='user_id.partner_id.image'></input>
+                                                
+                                            </div>
+                                            <div class="alert alert-info error_pro_photo mt16 hidden" align="center">
+                                                <span>Please add only valid image file.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                               </div>
+                               <div class="col-md-1 col-sm-12 col-xs-12"></div>
+                            </div>
+            </div>
+			
+
+
+            <div class="oe_structure"/>
+            <div class="container-fluid">
+                <div class="row">
+                    <section class="recent-viewed-section section">
+                        <div class="container">
+                            <div class="row recent-viewed-header text-center">
+                                <div class="col-md-12">
+                                    <h3>My Reservation Details</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <section>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12 tbl_service_body table-responsive mt16 mb16">
+                            <t t-if="reservations">
+                                <table class="table tbl_service_headar">
+                                    <thead>
+                                      <tr>
+                                        <th class='tbl_service_header text-center'>Reservation Number</th>
+                                        <th class='tbl_service_header text-center'>Reservation Date</th>
+                                        <th class='tbl_service_header text-center'>CheckIn</th>
+                                        <th class='tbl_service_header text-center'>CheckOut</th>
+                                        <th class='tbl_service_header text-center'>Adults</th>
+                                        <th class='tbl_service_header text-center'>Children</th>
+                                        <th class='tbl_service_header text-center'>Pets</th>
+                                        <th class='tbl_service_header text-center'>State</th>
+                                        <th class='tbl_service_header text-center'>Cancel Reservation</th>
+                                        <th class='tbl_service_header text-center'><i class='fa fa-eye'/></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody class='tbl_service_body_lines'>
+                                         <t t-foreach='reservations' t-as='reservation'>
+                                            <tr style="border-top: 2px solid black;">
+                                                <td class='td_b_number text-center'><t t-esc="reservation.reservation_no"/></td>
+                                                <td class="text-center">
+                                                	<span t-field="reservation.date_order" t-options ='{"format": "MM/dd/yyyy"}'></span>
+                                                </td>
+                                                <td class="text-center">
+                                                	<span t-field="reservation.check_in" t-options ='{"format": "MM/dd/yyyy"}'></span>
+                                                </td>
+                                                <td class="text-center">
+                                                	<span t-field="reservation.check_out" t-options ='{"format": "MM/dd/yyyy"}'></span>
+                                            	</td>
+                                                <td class="text-center"><t t-esc="reservation.adults"/></td>
+                                                <td class="text-center"><t t-esc="reservation.children"/></td>
+                                                <td class="text-center"><t t-esc="reservation.pet"/></td>
+                                                <td class="text-center">
+                                                    <t t-if="reservation.state == 'draft'">
+                                                        <span>Need To Confirm</span>
+                                                    </t>
+                                                    <t t-if="reservation.state == 'confirm'">
+                                                        <span>Confirm</span>
+                                                    </t>
+                                                    <t t-if="reservation.state == 'cancel'">
+                                                        <span>Cancel</span>
+                                                    </t>
+                                                    <t t-if="reservation.state == 'done'">
+                                                        <span>Done</span>
+                                                    </t>
+                                                </td>
+                                                <td class="text-center">
+                                                    <t t-if="reservation.state == 'draft'">
+                                                        <button style="background: #4caf50;color:#fff;border-color:#4caf50;" class="btn btn-primary cancel_reservation">Cancel</button>
+                                                    </t>
+                                                    <t t-if="reservation.state == 'confirm'">
+                                                        <button style="background: #4caf50;color:#fff;border-color:#4caf50;" class="btn btn-primary cancel_reservation">Cancel</button>
+                                                    </t>
+                                                </td>
+                                                <td class='td_b_eye text-center'><a style="color:#4caf50;">
+                                                    <!-- t-att-href="'/reservation/%s' % slug(reservation)" -->
+                                                    <i class='btn fa fa-eye'/></a></td>
+                                            </tr>
+                                         </t>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-if="not reservations">
+                                <div class="text-center mt32 mb32">
+                                    Sorry you do not have any reservation histroy. Hope you will come visit our parks soon.
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+</odoo>
+                        
+                            
